@@ -1,5 +1,5 @@
 // Configuration de l'API backend
-export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8009'
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://10.37.44.204:8009'
 
 // Configuration des transitions de thème
 export const THEME_TRANSITION_MS = 800
