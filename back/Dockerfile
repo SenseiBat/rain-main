@@ -1,48 +1,38 @@
-# ============================================
-# Stage 1: Build - Installation des dépendances
-# ============================================
-FROM composer:2.7 AS builder
-WORKDIR /app
+FROM php:8.2-cli
 
-# Copier uniquement les fichiers de dépendances (layer cachable)
-COPY composer.json composer.lock ./
+# Installation des dépendances système
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpq-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Installation ultra-rapide (cache Docker classique)
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader \
-    --classmap-authoritative \
-    --apcu-autoloader \
-    --ignore-platform-reqs
-
-# ============================================
-# Stage 2: Runtime - Image finale optimisée
-# ============================================
-FROM php:8.2-cli-alpine
-
-# Installation minimale des dépendances système en une seule layer
-RUN apk add --no-cache --virtual .build-deps postgresql-dev && \
-    apk add --no-cache postgresql-libs curl && \
-    docker-php-ext-install -j$(nproc) pdo_pgsql && \
-    apk del .build-deps && \
-    rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+# Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copier vendor optimisé depuis le builder
-COPY --from=builder /app/vendor ./vendor
+# Copier les fichiers de configuration composer
+COPY composer.json composer.lock ./
 
-# Copier tous les fichiers de l'application en une seule layer
+# Installation des dépendances PHP
+RUN composer install --no-scripts --no-autoloader
+
+# Copier le reste de l'application
 COPY . .
 
-# Setup final: création des dossiers + permissions + entrypoint
-RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache && \
-    chmod +x docker-entrypoint.sh && \
-    mv docker-entrypoint.sh /usr/local/bin/
+# Finaliser l'installation composer
+RUN composer dump-autoload --optimize
+
+# Créer les répertoires nécessaires et définir les permissions
+RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod +x docker-entrypoint.sh \
+    && mv docker-entrypoint.sh /usr/local/bin/
 
 EXPOSE 8000
 
