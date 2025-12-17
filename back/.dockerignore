@@ -11,3 +11,9 @@ storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*
+*.md
+tests
+.editorconfig
+phpunit.xml
+package.json
+vite.config.js
