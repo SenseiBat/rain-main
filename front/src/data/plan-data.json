@@ -1,0 +1,307 @@
+{
+  "hero": {
+    "icon": {
+      "glyph": "📊",
+      "label": "statistiques du plan VTOM"
+    },
+    "eyebrow": "Site documentaire",
+    "title": "Plan VTOM",
+    "subtitle": "Documentation et orchestration",
+    "actions": [
+      {
+        "label": "Accueil",
+        "icon": "🏠",
+        "ariaLabel": "accueil vtom",
+        "variant": "primary",
+        "path": "/"
+      },
+      {
+        "label": "Documentation",
+        "icon": "📚",
+        "ariaLabel": "documentation",
+        "variant": "outline",
+        "path": "/documentation"
+      },
+      {
+        "label": "Plan VTOM",
+        "icon": "🗺️",
+        "ariaLabel": "plan vtom",
+        "variant": "outline",
+        "path": "/plan"
+      }
+    ]
+  },
+  "homeSections": [
+    {
+      "id": "pilotage",
+      "title": "Pilotage opérationnel",
+      "description": "Préparez vos comités et rétro-plannings avec une vision consolidée des jalons VTOM.",
+      "highlights": [
+        "Dernières décisions projet et impacts métiers",
+        "Synthèse hebdo des risques sur les chaînes sensibles",
+        "Accès rapide aux plans de reprise prioritaires"
+      ]
+    },
+    {
+      "id": "veille",
+      "title": "Veille quotidienne",
+      "description": "Gardez un coup dœil sur les signaux clés sans plonger immédiatement dans la documentation détaillée.",
+      "highlights": [
+        "Alertes météo traitements",
+        "Indicateurs de volumétrie critiques",
+        "Prochaines fenêtres de maintenance"
+      ]
+    }
+  ],
+  "documentationSections": [
+    {
+      "id": "overview",
+      "title": "Vue documentaire",
+      "description": "Un panorama complet du plan VTOM pour suivre les phases projet, les domaines et leurs dépendances.",
+      "highlights": [
+        "Cartographie détaillée par domaine fonctionnel",
+        "Workflows critiques identifiés automatiquement",
+        "Notes et procédures partagées entre les équipes"
+      ]
+    },
+    {
+      "id": "monitoring",
+      "title": "Surveillance continue",
+      "description": "Priorisez vos actions grâce aux signaux consolidés provenant des jobs et traitements les plus sensibles.",
+      "highlights": [
+        "Météo des traitements en direct",
+        "Alertes sur les jobs sensibles",
+        "Liens rapides vers les procédures de reprise"
+      ]
+    }
+  ],
+  "quickAccess": {
+    "eyebrow": "Accès rapide",
+    "title": "Naviguez facilement dans la documentation VTOM",
+    "links": [
+      {
+        "title": "Plan VTOM complet",
+        "description": "Visualisez l'ensemble des applications, traitements et leurs dépendances organisés par phase et domaine",
+        "action": "Consulter le plan",
+        "accent": "#4b68ff",
+        "to": "/plan"
+      },
+      {
+        "title": "Recherche avancée",
+        "description": "Recherchez rapidement une application ou un traitement sensible au sein du plan VTOM",
+        "action": "Rechercher",
+        "accent": "#37b57a",
+        "intent": "search"
+      },
+      {
+        "title": "Documentation technique",
+        "description": "Accédez aux guides techniques, manuels d'exploitation et documentation des développeurs",
+        "action": "Lire la doc",
+        "accent": "#b35de8",
+        "to": "/documentation"
+      }
+    ]
+  },
+  "planColumns": [
+    {
+      "id": "phases",
+      "title": "Phases",
+      "placeholder": "Phase en consolidation",
+      "items": [
+        {
+          "label": "Phase 0",
+          "muted": true
+        }
+      ]
+    },
+    {
+      "id": "mde",
+      "title": "MDE",
+      "placeholder": "",
+      "items": []
+    },
+    {
+      "id": "pay",
+      "title": "PAY / Interfaces",
+      "placeholder": "Aucun traitement planifié",
+      "items": [
+        {
+          "label": "INIT-JANVIER",
+          "color": "#dca26e"
+        },
+        {
+          "label": "MISE-A-JOUR-TP",
+          "color": "#b7a2d6"
+        },
+        {
+          "label": "MAJ-APRES-PASSAG",
+          "color": "#d0c79f"
+        },
+        {
+          "label": "INTERF-TRANS-POP",
+          "color": "#d9a8c3"
+        },
+        {
+          "label": "INTERF-APU-INSEE",
+          "color": "#d9a8c3"
+        },
+        {
+          "label": "REPRISE-PARAM",
+          "color": "#9489d6"
+        },
+        {
+          "label": "INIT-MIGRADO-SLR",
+          "color": "#9489d6"
+        },
+        {
+          "label": "MIGRADO-RM",
+          "color": "#d4b07c"
+        },
+        {
+          "label": "MIGRADO-NAT-SLR",
+          "color": "#d4b07c"
+        }
+      ]
+    }
+  ],
+  "planDetails": {
+    "INIT-JANVIER": {
+      "name": "INIT-JANVIER",
+      "summary": "Préparation annuelle des comptes PAY",
+      "treatments": [
+        {
+          "name": "CR-POINTREPRISE",
+          "script": "sauve.sh",
+          "jobs": [
+            {
+              "label": "#app/scripts_exploitation/bdd/sauve.sh"
+            }
+          ]
+        },
+        {
+          "name": "INTEGRER",
+          "script": "integrer.sh"
+        },
+        {
+          "name": "VALIDATION",
+          "script": "lancerVALIDATION.sh"
+        }
+      ]
+    },
+    "FRANCHISSEMENT": {
+      "name": "FRANCHISSEMENT",
+      "summary": "Séquences de franchissement et réinitialisations associées.",
+      "treatments": [
+        {
+          "name": "FRANCHISSEMENT",
+          "script": "LANCERFRANCHISSEMENT.sh",
+          "jobs": [{ "label": "LANCERFRANCHISSEMENT.sh" }]
+        },
+        { "name": "SEQUENCE-META", "script": "reinit_compteurs_cft.sh" },
+        { "name": "REINIT-TOURS-FV", "script": "reinit_tours_fv.sh" }
+      ]
+    }
+  },
+  "landscape": {
+    "title": "Paysage",
+    "sections": [
+      {
+        "title": "1. traitements techniques",
+        "rows": [
+          {
+            "type": "stack",
+            "items": [
+              {
+                "label": "FRANCHISSEMENT",
+                "color": "#6579c7"
+              },
+              {
+                "label": "SYNCHRO-I7",
+                "color": "#6579c7"
+              }
+            ]
+          },
+          {
+            "type": "connection",
+            "from": {
+              "label": "PURGE-FIC-TAB",
+              "color": "#6579c7"
+            },
+            "to": {
+              "label": "PURGE-TABLES-SPRINGBATCH",
+              "color": "#6579c7"
+            }
+          },
+          {
+            "type": "single",
+            "label": "PURGE-ANNUELLE",
+            "color": "#6579c7"
+          },
+          {
+            "type": "single",
+            "label": "RESTAURATIONS",
+            "color": "#e2d09a"
+          }
+        ]
+      },
+      {
+        "title": "2. traitements ponctuels",
+        "rows": [
+          {
+            "type": "grid",
+            "items": [
+              {
+                "label": "PISTE-AUDIT",
+                "color": "#5772b0"
+              },
+              {
+                "label": "PONCTUEL",
+                "color": "#5772b0"
+              },
+              {
+                "label": "INVALIDATION",
+                "color": "#5772b0"
+              },
+              {
+                "label": "FRED-ASYNC",
+                "color": "#b87373"
+              },
+              {
+                "label": "SECURHORTAV",
+                "color": "#5772b0"
+              },
+              {
+                "label": "RECALL",
+                "color": "#5772b0"
+              },
+              {
+                "label": "PONCTUEL-PAIR",
+                "color": "#5772b0"
+              },
+              {
+                "label": "METIER-CHORUS",
+                "color": "#5772b0"
+              },
+              {
+                "label": "VALIDATION",
+                "color": "#5772b0"
+              },
+              {
+                "label": "SAUVEGARDE-FULL",
+                "color": "#5772b0"
+              },
+              {
+                "label": "STAT-HISTO",
+                "color": "#b87373"
+              },
+              {
+                "label": "JOURNALIERE-FULL",
+                "color": "#5772b0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
