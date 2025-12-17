@@ -1,50 +1,48 @@
-# Build stage - installation rapide des dépendances
-FROM composer:latest AS builder
+# ============================================
+# Stage 1: Build - Installation des dépendances
+# ============================================
+FROM composer:2.7 AS builder
 WORKDIR /app
 
-COPY composer.json composer.lock* ./
+# Copier uniquement les fichiers de dépendances (layer cachable)
+COPY composer.json composer.lock ./
 
-# Installation ultra-rapide avec cache
-RUN --mount=type=cache,target=/tmp/cache \
-    composer install \
+# Installation ultra-rapide (cache Docker classique)
+RUN composer install \
     --no-dev \
     --no-scripts \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
     --classmap-authoritative \
+    --apcu-autoloader \
     --ignore-platform-reqs
 
-# Runtime stage - image finale ultra-minimale
+# ============================================
+# Stage 2: Runtime - Image finale optimisée
+# ============================================
 FROM php:8.2-cli-alpine
 
-# Cache APK et installation ultra-rapide
-RUN --mount=type=cache,target=/var/cache/apk \
-    apk add --no-cache postgresql-libs curl \
-    && apk add --no-cache --virtual .build-deps postgresql-dev \
-    && docker-php-ext-install pdo_pgsql \
-    && apk del .build-deps
+# Installation minimale des dépendances système en une seule layer
+RUN apk add --no-cache --virtual .build-deps postgresql-dev && \
+    apk add --no-cache postgresql-libs curl && \
+    docker-php-ext-install -j$(nproc) pdo_pgsql && \
+    apk del .build-deps && \
+    rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 WORKDIR /var/www/html
 
-# Copier vendor depuis le builder
+# Copier vendor optimisé depuis le builder
 COPY --from=builder /app/vendor ./vendor
 
-# Copier les fichiers Laravel essentiels en un bloc
-COPY artisan composer.json composer.lock docker-entrypoint.sh ./
-COPY app app
-COPY bootstrap bootstrap
-COPY config config
-COPY database database
-COPY routes routes
-COPY resources resources
-COPY public public
+# Copier tous les fichiers de l'application en une seule layer
+COPY . .
 
-# Setup rapide en une seule commande
-RUN mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache \
-    && mv docker-entrypoint.sh /usr/local/bin/ \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh
+# Setup final: création des dossiers + permissions + entrypoint
+RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache && \
+    chmod +x docker-entrypoint.sh && \
+    mv docker-entrypoint.sh /usr/local/bin/
 
 EXPOSE 8000
 
