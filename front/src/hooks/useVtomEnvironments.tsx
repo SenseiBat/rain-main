@@ -42,18 +42,7 @@ export function useVtomEnvironments() {
             environments: jsonData,
             count: jsonData.length,
           })
-        } else if (jsonData.environments) {
-          setData({
-            environments: jsonData.environments,
-            count: jsonData.environments.length,
-          })
-        } else {
-          setData({
-            environments: [jsonData],
-            count: 1,
-          })
         }
-
         setError(null)
       } catch (err) {
         console.error('Erreur VTOM:', err)

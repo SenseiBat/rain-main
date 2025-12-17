@@ -12,10 +12,9 @@ interface PlanBoardProps {
   onBack: () => void
   onAppSelect?: (item: PlanItem) => void
   onSearch?: () => void
-  onImportXML?: () => void
 }
 
-function PlanBoard({ columns, landscape, onBack, onAppSelect, onSearch, onImportXML }: PlanBoardProps) {
+function PlanBoard({ columns, landscape, onBack, onAppSelect, onSearch }: PlanBoardProps) {
   return (
     <div className="plan-board-wrapper">
       <section className="plan-board">
@@ -27,15 +26,6 @@ function PlanBoard({ columns, landscape, onBack, onAppSelect, onSearch, onImport
             <p>Consultez les chaînes de traitements et leurs domaines fonctionnels.</p>
           </div>
           <div className="plan-board__actions">
-            {onImportXML && (
-              <GhostButton
-                label="Importer XML"
-                icon="📁"
-                ariaLabel="importer un fichier XML VTOM"
-                variant="primary"
-                onClick={onImportXML}
-              />
-            )}
             {onSearch && (
               <GhostButton
                 label="Recherche avancée"

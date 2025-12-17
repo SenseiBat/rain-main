@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import PlanBoard from './PlanBoard'
 import PlanModal from './PlanModal'
 import TreatmentModal from './TreatmentModal'
-import XMLImportModal from './XMLImportModal'
 import {
   AppDetail,
   AppTreatment,
@@ -11,7 +10,6 @@ import {
   PlanColumn,
   PlanItem,
   TreatmentSelection,
-  PlanDataPayload,
 } from '../types'
 
 interface PlanPageProps {
@@ -21,7 +19,6 @@ interface PlanPageProps {
   initialSelection: string | null
   onSelectionHandled?: () => void
   onSearchRequest?: () => void
-  onImportData?: (data: Partial<PlanDataPayload>) => void
 }
 
 // Vue « Plan VTOM » : gère les modales liées aux applications et traitements.
@@ -33,13 +30,11 @@ function PlanPage({
   initialSelection,
   onSelectionHandled,
   onSearchRequest,
-  onImportData,
 }: PlanPageProps) {
   const navigate = useNavigate()
   // État local : application sélectionnée et éventuel traitement détaillé.
   const [selectedApp, setSelectedApp] = useState<AppDetail | null>(null)
   const [selectedTreatment, setSelectedTreatment] = useState<TreatmentSelection | null>(null)
-  const [showImportModal, setShowImportModal] = useState(false)
 
   // --- Gestion de la modale « application » ----------------------------------------------------
   const handleSelectApp = useCallback(
@@ -73,24 +68,6 @@ function PlanPage({
     navigate('/')
   }, [navigate])
 
-  const handleOpenImport = useCallback(() => {
-    setShowImportModal(true)
-  }, [])
-
-  const handleCloseImport = useCallback(() => {
-    setShowImportModal(false)
-  }, [])
-
-  const handleImport = useCallback(
-    (data: Partial<PlanDataPayload>) => {
-      if (onImportData) {
-        onImportData(data)
-      }
-      setShowImportModal(false)
-    },
-    [onImportData],
-  )
-
   // --- Effet : si la page arrive avec une sélection (depuis la recherche), on ouvre la modale ----
   useEffect(() => {
     if (initialSelection) {
@@ -111,7 +88,6 @@ function PlanPage({
         onBack={handleBack}
         onAppSelect={handleSelectApp}
         onSearch={onSearchRequest}
-        onImportXML={handleOpenImport}
       />
       {/* Modale listant les traitements de l'application sélectionnée */}
       <PlanModal app={selectedApp} onClose={handleCloseModal} onSelectTreatment={handleSelectTreatment} />
@@ -121,8 +97,6 @@ function PlanPage({
         onBackToPlan={handleCloseTreatmentModal}
         onBackToApp={handleReturnToApp}
       />
-      {/* Modale d'import XML VTOM */}
-      <XMLImportModal isOpen={showImportModal} onClose={handleCloseImport} onImport={handleImport} />
     </>
   )
 }
