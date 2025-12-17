@@ -31,7 +31,7 @@ function Home({ quickAccess, onOpenSearch, snapshot }: HomeProps) {
       {message && !isLoading && !error && (
         <section className="backend-test">
           <div className="backend-test__content">
-            <p style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '0.75rem 1rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
+            <p className="backend-test__success">
               ✅ Backend connecté: {message}
             </p>
           </div>
@@ -42,22 +42,22 @@ function Home({ quickAccess, onOpenSearch, snapshot }: HomeProps) {
       <section className="backend-test">
         <div className="backend-test__content">
           {vtomLoading && (
-            <p style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.75rem 1rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
+            <p className="backend-test__loading">
               ⏳ Chargement des environnements VTOM...
             </p>
           )}
           {vtomError && (
-            <p style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.75rem 1rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
+            <p className="backend-test__error">
               ❌ Erreur VTOM: {vtomError}
             </p>
           )}
           {vtomData && !vtomLoading && !vtomError && (
-            <div style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', padding: '0.75rem 1rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
-              <p style={{ marginBottom: '0.5rem' }}>
+            <div className="backend-test__info">
+              <p className="backend-test__info-title">
                 🌐 <strong>Environnements VTOM:</strong> {vtomData.count} trouvé(s)
               </p>
               {vtomData.environments.length > 0 && (
-                <ul style={{ paddingLeft: '1.5rem', margin: 0 }}>
+                <ul className="backend-test__list">
                   {vtomData.environments.slice(0, 5).map((env, index) => (
                     <li key={index}>
                       {env.name || env.id || `Environnement ${index + 1}`}
