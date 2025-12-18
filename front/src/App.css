@@ -52,7 +52,10 @@
 :root.theme-transitioning .plan-pill,
 :root.theme-transitioning .plan-modal,
 :root.theme-transitioning .treatment-modal,
-:root.theme-transitioning .search-modal {
+:root.theme-transitioning .search-modal,
+:root.theme-transitioning .vtom-intro,
+:root.theme-transitioning .vtom-section,
+:root.theme-transitioning .vtom-card {
   filter: saturate(0.95) brightness(0.98);
 }
 
@@ -2111,7 +2114,7 @@
   font-family: 'Courier New', monospace;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255,  255, 255, 0.7);
   white-space: pre-wrap;
   word-wrap: break-word;
   margin: 0;
