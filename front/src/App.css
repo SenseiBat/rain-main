@@ -575,12 +575,16 @@
   position: relative;
   width: 100%;
   display: flex;
+  justify-content: center;
   align-items: flex-start;
   gap: 1.5rem;
   flex-wrap: wrap;
+  padding: 0 1rem;
 }
 
 .plan-board {
+  width: 100%;
+  max-width: 1400px;
   border-radius: 1.35rem;
   padding: 2.5rem clamp(1.5rem, 6vw, 4rem);
   background: linear-gradient(140deg, var(--color-bleu-france-dark), #0d1842 55%, var(--color-bleu-france));
@@ -633,6 +637,9 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(160px, 0.8fr)) minmax(640px, 3.3fr);
   gap: 1.75rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Colonnes fonctionnelles + paysage détaillé */

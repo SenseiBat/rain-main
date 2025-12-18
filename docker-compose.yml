@@ -35,7 +35,7 @@ services:
       db_vitrine:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://10.37.44.204:8000/api/health || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 3

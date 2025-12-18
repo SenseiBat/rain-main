@@ -28,6 +28,13 @@
         "ariaLabel": "plan vtom",
         "variant": "outline",
         "path": "/plan"
+      },
+      {
+        "label": "Vtom JSON",
+        "icon": "🌐",
+        "ariaLabel": "vtom json",
+        "variant": "outline",
+        "path": "/vtom-json"
       }
     ]
   },

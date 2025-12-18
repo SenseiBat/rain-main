@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import AdvancedSearchModal from './AdvancedSearchModal'
 import CookieConsent from './CookieConsent'
 import Documentation from './Documentation'
+import VtomJson from './VtomJson'
 import Footer from './Footer'
 import Hero from './Hero'
 import Home from './Home'
@@ -12,7 +13,7 @@ import { usePlanData } from '../hooks/usePlanData'
 // Gère la navigation principale, la barre héro, et la recherche avant d'orienter vers les pages.
 // Ce composant coordonne les données statiques et les interactions utilisateur.
 function AppLayout() {
-  const { planData, planApplications: precomputedApplications, getAppDetail, updatePlanData } = usePlanData()
+  const { planData, planApplications: precomputedApplications, getAppDetail } = usePlanData()
   const {
     hero: heroContent,
     quickAccess: quickAccessContent,
@@ -80,6 +81,7 @@ function AppLayout() {
           }
         />
         <Route path="/documentation" element={<Documentation />} />
+        <Route path="/vtom-json" element={<VtomJson />} />
         <Route
           path="/plan"
           element={
@@ -90,7 +92,6 @@ function AppLayout() {
               initialSelection={searchSelection}
               onSelectionHandled={handleSelectionHandled}
               onSearchRequest={handleOpenSearch}
-              onImportData={updatePlanData}
             />
           }
         />
