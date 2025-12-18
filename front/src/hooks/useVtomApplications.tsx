@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { VTOM_API_URL, VTOM_API_KEY } from '../constants'
 
 // Type pour les applications VTOM
 interface VtomApplication {
@@ -22,11 +23,11 @@ export function useVtomApplications(environmentId: string = 'PAY_TOURS') {
   useEffect(() => {
     const fetchVtomApplications = async () => {
       try {
-        const response = await fetch(`https://10.37.44.206:40010/vtom/public/domain/5.0/environments/${environmentId}/applications`, {
+        const response = await fetch(`${VTOM_API_URL}/environments/${environmentId}/applications`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-API-KEY': 'Esp4Qo4tMy8rVe3q',
+            'X-API-KEY': VTOM_API_KEY,
           },
         })
 

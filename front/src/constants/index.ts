@@ -1,6 +1,10 @@
 // Configuration de l'API backend
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://10.37.44.204:8009'
 
+// Configuration de l'API VTOM
+export const VTOM_API_URL = 'https://10.37.44.206:40010/vtom/public/domain/5.0'
+export const VTOM_API_KEY = 'Esp4Qo4tMy8rVe3q'
+
 // Configuration des transitions de thème
 export const THEME_TRANSITION_MS = 800
 

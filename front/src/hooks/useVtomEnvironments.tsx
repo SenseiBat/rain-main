@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { VTOM_API_URL, VTOM_API_KEY } from '../constants'
 
 // Type pour les environnements VTOM
 interface VtomEnvironment {
@@ -21,11 +22,11 @@ export function useVtomEnvironments() {
   useEffect(() => {
     const fetchVtomEnvironments = async () => {
       try {
-        const response = await fetch('https://10.37.44.206:40010/vtom/public/domain/5.0/environments', {
+        const response = await fetch(`${VTOM_API_URL}/environments`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-API-KEY': 'Esp4Qo4tMy8rVe3q',
+            'X-API-KEY': VTOM_API_KEY,
           },
         })
 

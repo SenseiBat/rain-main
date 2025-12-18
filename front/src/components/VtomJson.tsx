@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useVtomEnvironments } from '../hooks/useVtomEnvironments'
 import { useVtomApplications } from '../hooks/useVtomApplications'
 
@@ -6,6 +7,17 @@ import { useVtomApplications } from '../hooks/useVtomApplications'
 function VtomJson() {
   const { data, isLoading, error } = useVtomEnvironments()
   const { data: appsData, isLoading: appsLoading, error: appsError } = useVtomApplications('PAY_TOURS')
+  const [expandedApp, setExpandedApp] = useState<number | null>(null)
+
+  const toggleApp = (index: number) => {
+    setExpandedApp(expandedApp === index ? null : index)
+  }
+
+  const renderValue = (value: unknown): string => {
+    if (value === null || value === undefined) return 'N/A'
+    if (typeof value === 'object') return JSON.stringify(value, null, 2)
+    return String(value)
+  }
 
   return (
     <>
@@ -101,24 +113,44 @@ function VtomJson() {
               </span>
             </div>
 
-            <div className="vtom-grid">
+            <div className="vtom-accordion">
               {appsData.applications.map((app, index) => (
-                <div key={app.id || index} className="vtom-card">
-                  <div className="vtom-card__icon">📦</div>
-                  <h4 className="vtom-card__title">
-                    {app.name || app.id || `Application ${index + 1}`}
-                  </h4>
-                  {app.id && (
-                    <p className="vtom-card__meta">ID: {app.id}</p>
+                <div key={app.id || index} className="vtom-accordion-item">
+                  <button
+                    className={`vtom-accordion-header ${expandedApp === index ? 'expanded' : ''}`}
+                    onClick={() => toggleApp(index)}
+                    aria-expanded={expandedApp === index}
+                  >
+                    <div className="vtom-accordion-header__content">
+                      <span className="vtom-accordion-header__icon">📦</span>
+                      <div className="vtom-accordion-header__text">
+                        <h4 className="vtom-accordion-header__title">
+                          {String(app.name || `Application ${index + 1}`)}
+                        </h4>
+                        <p className="vtom-accordion-header__meta">
+                          Environnement: {String(app.environment || 'N/A')}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="vtom-accordion-header__arrow">
+                      {expandedApp === index ? '▼' : '▶'}
+                    </span>
+                  </button>
+
+                  {expandedApp === index && (
+                    <div className="vtom-accordion-content">
+                      <div className="vtom-accordion-grid">
+                        {Object.entries(app).map(([key, value]) => (
+                          <div key={key} className="vtom-accordion-field">
+                            <span className="vtom-accordion-field__label">{key}:</span>
+                            <span className="vtom-accordion-field__value">
+                              {renderValue(value)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  {Object.entries(app)
-                    .filter(([key]) => key !== 'id' && key !== 'name')
-                    .slice(0, 3)
-                    .map(([key, value]) => (
-                      <p key={key} className="vtom-card__info">
-                        <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                      </p>
-                    ))}
                 </div>
               ))}
             </div>
