@@ -2,17 +2,49 @@ import { useState } from 'react'
 import { useVtomEnvironments } from '../hooks/useVtomEnvironments'
 import { useVtomApplications } from '../hooks/useVtomApplications'
 
-// Page Vtom JSON : affiche la liste des environnements VTOM et les applications de PAY_TOURS
-// Les données sont organisées en sections comme sur la page d'accueil
+/**
+ * Composant de la page "Vtom JSON"
+ * 
+ * Affiche deux sections principales :
+ * 1. Liste des environnements VTOM disponibles (sous forme de cartes)
+ * 2. Liste déroulante (accordion) des applications de l'environnement PAY_TOURS
+ * 
+ * Les données sont récupérées en temps réel depuis l'API VTOM.
+ * Le design s'inspire de la page d'accueil avec des sections bien organisées.
+ * 
+ * Fonctionnalités :
+ * - Affichage des environnements sous forme de grille de cartes
+ * - Accordion interactif pour explorer les détails complets de chaque application
+ * - Gestion des états de chargement et d'erreur
+ * - Support du thème clair/sombre
+ * - Animations d'apparition en cascade
+ */
 function VtomJson() {
+  // Récupération de la liste des environnements VTOM
   const { data, isLoading, error } = useVtomEnvironments()
+  
+  // Récupération des applications de l'environnement PAY_TOURS
   const { data: appsData, isLoading: appsLoading, error: appsError } = useVtomApplications('PAY_TOURS')
+  
+  // État local pour gérer quelle application est déroulée dans l'accordion
+  // null = aucune application ouverte, number = index de l'application ouverte
   const [expandedApp, setExpandedApp] = useState<number | null>(null)
 
+  /**
+   * Bascule l'état ouvert/fermé d'une application dans l'accordion
+   * Si l'application cliquée est déjà ouverte, on la ferme
+   * Sinon, on ferme toutes les autres et on ouvre celle-ci
+   */
   const toggleApp = (index: number) => {
     setExpandedApp(expandedApp === index ? null : index)
   }
 
+  /**
+   * Formatte une valeur pour l'affichage dans l'accordion
+   * - null/undefined → 'N/A'
+   * - object → JSON formaté avec indentation
+   * - autres → conversion en string
+   */
   const renderValue = (value: unknown): string => {
     if (value === null || value === undefined) return 'N/A'
     if (typeof value === 'object') return JSON.stringify(value, null, 2)
