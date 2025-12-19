@@ -1,30 +1,64 @@
+/**
+ * Documentation - Page de documentation avec onglets utilisateur/développeur
+ * 
+ * Affiche deux types de documentation :
+ * 1. **Utilisateur** : Guide d'utilisation du site pour les utilisateurs finaux
+ * 2. **Développeur** : Guide technique pour les développeurs (architecture, API, etc.)
+ * 
+ * Fonctionnalités :
+ * - Toggle entre les deux documentations
+ * - Parsing automatique du contenu structuré (titres, paragraphes, listes)
+ * - Affichage avec numérotation des sections (1., 2., 3., etc.)
+ * - Support des listes à puces dans les sections
+ * - Introduction sans numérotation en haut de page
+ * 
+ * Format des fichiers JSON :
+ * - documentation_utilisateur.json
+ * - documentation_developpeur.json
+ * Structure : { title: string, content: string }
+ * Le content est parsé automatiquement pour extraire les sections
+ * 
+ * Architecture :
+ * - État local : docType ('user' | 'developer')
+ * - useMemo pour parsing une seule fois par type de doc
+ * - GhostButton pour le toggle entre les docs
+ */
 import { ReactNode, useMemo, useState } from 'react'
 import GhostButton from './GhostButton'
 import developerDocumentation from '../data/documentation_developpeur.json'
 import userDocumentation from '../data/documentation_utilisateur.json'
+
+/** Type de documentation disponible */
 type DocType = 'user' | 'developer'
 
+/** Structure d'un fichier de documentation JSON */
 interface DocumentationFile {
   title: string
   content: string
 }
 
+/** Section parsée avec titre et paragraphes */
 interface ParsedSection {
   title: string
   paragraphs: string[]
 }
 
+/** Documentation complète parsée */
 interface ParsedDocumentation {
   intro: string[]
   sections: ParsedSection[]
 }
 
+/** Mapping des types de doc vers les fichiers JSON */
 const DOC_MAP: Record<DocType, DocumentationFile> = {
   user: userDocumentation,
   developer: developerDocumentation,
 }
 
-// Convertit le texte semi-structuré des JSON (numérotation + listes) en sections exploitables.
+/**
+ * Parse le contenu texte d'une documentation pour extraire intro et sections
+ * Gère la numérotation automatique et les listes à puces
+ */
 function parseDocumentationContent(doc: DocumentationFile): ParsedDocumentation {
   const sanitized = doc.content.replace(/\r/g, '').trim()
   if (!sanitized) {

@@ -3,7 +3,7 @@
  * 
  * Affiche la vue complète du plan VTOM organisée en :
  * - Colonnes fonctionnelles (Domaines, Flux, Programmes, Traitements)
- * - Paysage applicatif (structure hiérarchique complexe)
+ * - Plan applicatif (structure hiérarchique complexe)
  * 
  * Structure :
  * - Header avec titre, description et actions (recherche, retour)
@@ -29,7 +29,7 @@ import { LandscapePlan, PlanColumn, PlanItem } from '../types'
 interface PlanBoardProps {
   /** Colonnes du plan (domaines, flux, programmes, traitements) */
   columns: readonly PlanColumn[]
-  /** Paysage applicatif avec structure hiérarchique */
+  /** Plan applicatif avec structure hiérarchique */
   landscape: LandscapePlan
   /** Callback pour retour à l'accueil */
   onBack: () => void

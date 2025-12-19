@@ -1,3 +1,27 @@
+/**
+ * AdvancedSearchModal - Modale de recherche avancée d'applications
+ * 
+ * Modale plein écran permettant de rechercher une application dans tout le plan VTOM.
+ * Affiche les résultats filtrés en temps réel pendant la saisie.
+ * 
+ * Fonctionnalités :
+ * - Recherche en temps réel (filtre pendant la saisie)
+ * - Recherche insensible à la casse et aux accents
+ * - Navigation clavier : Échap pour fermer, Entrée pour sélectionner premier résultat
+ * - Focus automatique sur le champ de recherche à l'ouverture
+ * - Compteur de résultats trouvés
+ * - Affichage de la colonne d'appartenance de chaque application
+ * 
+ * Interface :
+ * - Input de recherche centré en haut
+ * - Grille de résultats responsive (max 3 colonnes)
+ * - Fermeture par Échap ou clic sur backdrop
+ * 
+ * Architecture :
+ * - État local : query (texte de recherche)
+ * - useMemo pour filtrer les applications de façon optimisée
+ * - Focus automatique avec timeout pour attendre le rendu
+ */
 import {
   KeyboardEvent as ReactKeyboardEvent,
   useCallback,
@@ -9,13 +33,29 @@ import {
 import { PlanApplicationsEntry } from '../types'
 
 interface AdvancedSearchModalProps {
+  /** Liste complète des applications du plan (planApplications aplati) */
   applications: readonly PlanApplicationsEntry[]
+  /** État d'ouverture de la modale */
   isOpen: boolean
+  /** Callback de fermeture */
   onClose: () => void
+  /** Callback lors de la sélection d'une application */
   onSelect: (label: string) => void
 }
 
-// Modale de recherche plein écran : filtre la liste aplatie des applications.
+/**
+ * AdvancedSearchModal - Composant de recherche avancée
+ * 
+ * @example
+ * ```tsx
+ * <AdvancedSearchModal 
+ *   applications={planApplications}
+ *   isOpen={isSearchOpen}
+ *   onClose={() => setIsSearchOpen(false)}
+ *   onSelect={handleSelectApp}
+ * />
+ * ```
+ */
 function AdvancedSearchModal({ applications, isOpen, onClose, onSelect }: AdvancedSearchModalProps) {
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement | null>(null)

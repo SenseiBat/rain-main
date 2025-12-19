@@ -91,7 +91,7 @@ function Home({ quickAccess, onOpenSearch, snapshot }: HomeProps) {
             </p>
           )}
           
-          {/* État de succès : affiche les 5 premiers environnements + compteur */}
+          {/* État de succès : affiche les environnements Vtom */}
           {vtomData && !vtomLoading && !vtomError && (
             <div className="backend-test__info">
               <p className="backend-test__info-title">
@@ -99,16 +99,13 @@ function Home({ quickAccess, onOpenSearch, snapshot }: HomeProps) {
               </p>
               {vtomData.environments.length > 0 && (
                 <ul className="backend-test__list">
-                  {/* Affiche les 5 premiers environnements */}
-                  {vtomData.environments.slice(0, 5).map((env, index) => (
+                  
+                  {/* Affiche les environnements */}
+                  {vtomData.environments.slice(0, vtomData.environments.length).map((env, index) => (
                     <li key={index}>
                       {env.name || env.id || `Environnement ${index + 1}`}
                     </li>
                   ))}
-                  {/* Indicateur s'il y en a plus */}
-                  {vtomData.environments.length > 5 && (
-                    <li>... et {vtomData.environments.length - 5} de plus</li>
-                  )}
                 </ul>
               )}
             </div>

@@ -1,3 +1,22 @@
+/**
+ * PlanPage - Page principale du plan VTOM
+ * 
+ * Affiche le plan applicatif complet avec deux vues :
+ * 1. PlanBoard : Plan vertical avec colonnes (Sources, Intermédiaire, Fin de chaîne)
+ * 2. Landscape : Plan horizontal (paysage applicatif)
+ * 
+ * Fonctionnalités :
+ * - Clic sur une application → ouvre PlanModal avec liste des traitements
+ * - Clic sur un traitement → ouvre TreatmentModal avec détails (script, jobs)
+ * - Gestion de la sélection initiale depuis la recherche avancée
+ * - Support de la touche Échap pour fermeture des modales
+ * - Navigation vers la documentation
+ * 
+ * Architecture :
+ * - État local : selectedApp (modale app) + selectedTreatment (modale traitement)
+ * - Données depuis plan-data.json (100% statique côté front)
+ * - Composition : PlanBoard + PlanModal + TreatmentModal
+ */
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PlanBoard from './PlanBoard'
@@ -13,16 +32,33 @@ import {
 } from '../types'
 
 interface PlanPageProps {
+  /** Colonnes du plan vertical */
   planColumns: readonly PlanColumn[]
+  /** Configuration du paysage horizontal */
   landscape: LandscapePlan
+  /** Fonction pour récupérer les détails d'une application par son nom */
   getAppDetail: (label: string) => AppDetail
+  /** Nom de l'application à sélectionner automatiquement (depuis recherche) */
   initialSelection: string | null
+  /** Callback appelé après traitement de la sélection initiale */
   onSelectionHandled?: () => void
+  /** Callback pour ouvrir la recherche avancée */
   onSearchRequest?: () => void
 }
 
-// Vue « Plan VTOM » : gère les modales liées aux applications et traitements.
-// Les données proviennent de plan-data.json afin d'afficher un plan 100 % statique côté front.
+/**
+ * PlanPage - Composant de la page du plan VTOM
+ * 
+ * @example
+ * ```tsx
+ * <PlanPage 
+ *   planColumns={planData.planColumns}
+ *   landscape={planData.landscape}
+ *   getAppDetail={getAppDetail}
+ *   initialSelection="ADM"
+ * />
+ * ```
+ */
 function PlanPage({
   planColumns,
   landscape,

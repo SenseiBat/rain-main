@@ -1,14 +1,45 @@
+/**
+ * QuickAccess - Section d'accès rapide avec grille de cartes cliquables
+ * 
+ * Affiche une grille de cartes permettant un accès rapide aux fonctionnalités principales :
+ * - Navigation vers les plans (Plan complet, Landscape)
+ * - Ouverture de la recherche avancée
+ * - Autres raccourcis configurables
+ * 
+ * Personnalisation des couleurs :
+ * - Chaque lien a une couleur d'accent (link.accent)
+ * - Injectée via CSS custom property (--accent-color)
+ * - Utilisée pour la bordure, le texte et les effets hover
+ * 
+ * Fonctionnalités :
+ * - Intent 'search' : ouvre la modale de recherche au lieu de naviguer
+ * - Navigation SPA via React Router pour les autres liens
+ * - Layout responsive (grille qui s'adapte aux écrans)
+ * 
+ * Contenu piloté par JSON (plan-data.json > quickAccess)
+ */
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CSSVarProperties, QuickAccessContent, QuickLink } from '../types'
 
-// Grille d'accès rapide : chaque carte déclenche une redirection ou une ouverture de recherche.
-// La couleur d'accent est fournie via une variable CSS personnalisée afin de garder le thème contrôlable.
-
 interface QuickAccessProps extends QuickAccessContent {
+  /** Callback pour ouvrir la modale de recherche avancée */
   onOpenSearch?: () => void
 }
 
+/**
+ * QuickAccess - Composant de la section d'accès rapide
+ * 
+ * @example
+ * ```tsx
+ * <QuickAccess 
+ *   eyebrow="Accès rapide"
+ *   title="Explorez le plan"
+ *   links={[...]}
+ *   onOpenSearch={handleOpenSearchModal}
+ * />
+ * ```
+ */
 function QuickAccess({ eyebrow, title, links, onOpenSearch }: QuickAccessProps) {
   const navigate = useNavigate()
 

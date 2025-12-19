@@ -1,13 +1,50 @@
+/**
+ * PlanModal - Modale d'affichage des traitements d'une application
+ * 
+ * Affiche la liste complète des traitements (scripts) d'une application
+ * avec possibilité de cliquer sur un traitement pour voir ses détails.
+ * 
+ * Fonctionnalités :
+ * - Animation d'ouverture/fermeture fluide (220ms)
+ * - Fermeture par touche Échap
+ * - Fermeture en cliquant sur le backdrop (zone sombre)
+ * - Description optionnelle de l'application (summary)
+ * - Liste des traitements avec nom du script
+ * - Clic sur traitement → ouvre TreatmentModal
+ * 
+ * Animation :
+ * - Classe .modal--closing appliquée pendant 220ms avant fermeture réelle
+ * - Permet une transition CSS douce définie dans App.css
+ * 
+ * Accessibilité :
+ * - Support clavier (Échap)
+ * - Bouton de fermeture visible
+ * - Focus trap implicite (modale par dessus le reste)
+ */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppDetail, AppTreatment } from '../types'
 
 interface PlanModalProps {
+  /** Application à afficher (null = modale fermée) */
   app: AppDetail | null
+  /** Callback de fermeture de la modale */
   onClose: () => void
+  /** Callback lors du clic sur un traitement (ouvre TreatmentModal) */
   onSelectTreatment?: (app: AppDetail, treatment: AppTreatment) => void
 }
 
-// Modale listant les traitements d'une application avec animation d'ouverture/fermeture.
+/**
+ * PlanModal - Composant de la modale d'application
+ * 
+ * @example
+ * ```tsx
+ * <PlanModal 
+ *   app={selectedApp} 
+ *   onClose={() => setSelectedApp(null)}
+ *   onSelectTreatment={handleOpenTreatment}
+ * />
+ * ```
+ */
 function PlanModal({ app, onClose, onSelectTreatment }: PlanModalProps) {
   // Animation d'apparition/disparition synchronisée avec la classe CSS.
   const [isClosing, setIsClosing] = useState(false)

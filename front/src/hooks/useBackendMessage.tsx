@@ -1,7 +1,39 @@
+/**
+ * useBackendMessage - Hook pour tester la connexion au backend Laravel
+ * 
+ * Ce hook effectue un appel de test à l'API backend pour vérifier
+ * que la communication entre le frontend React et le backend Laravel fonctionne.
+ * 
+ * Fonctionnalités :
+ * - Appel unique au montage du composant
+ * - Timeout de 5 secondes pour éviter les attentes infinies
+ * - Annulation automatique si le composant est démonté
+ * - Gestion CORS avec headers appropriés
+ * 
+ * URL appelée : ${API_BASE_URL}/api/message (port 8009 selon docker-compose.yml)
+ * 
+ * @returns {Object} État de la requête avec :
+ *   - message: Message retourné par le backend (string vide si pas de réponse)
+ *   - isLoading: true pendant la requête, false après
+ *   - error: Message d'erreur si échec, null sinon
+ * 
+ * @example
+ * ```tsx
+ * function TestBackend() {
+ *   const { message, isLoading, error } = useBackendMessage()
+ *   
+ *   if (isLoading) return <p>Connexion...</p>
+ *   if (error) return <p>Erreur: {error}</p>
+ *   return <p>Backend: {message}</p>
+ * }
+ * ```
+ */
 import { useEffect, useState } from 'react'
 import { API_BASE_URL } from '../constants'
 
-// Hook personnalisé pour tester la communication avec le backend Laravel
+/**
+ * Hook useBackendMessage - Test de connexion backend
+ */
 export function useBackendMessage() {
   const [message, setMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)

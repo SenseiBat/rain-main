@@ -1,13 +1,50 @@
+/**
+ * TreatmentModal - Modale de détails d'un traitement
+ * 
+ * Modale secondaire affichant les détails complets d'un traitement :
+ * - Nom du traitement
+ * - Script exécuté
+ * - Liste des jobs (étapes) si disponibles
+ * 
+ * Navigation :
+ * - Bouton "Retour au plan" → ferme toutes les modales
+ * - Bouton "Retour à l'application" → retour à PlanModal
+ * 
+ * Fonctionnalités :
+ * - Animation d'ouverture/fermeture (220ms comme PlanModal)
+ * - Affichage des jobs numérotés si disponibles
+ * - Breadcrumb : Application > Traitement
+ * - Navigation fluide entre les niveaux de détails
+ * 
+ * Architecture :
+ * - Même système d'animation que PlanModal (isClosing + timeout)
+ * - Reçoit une TreatmentSelection (app + treatment)
+ * - Deux callbacks de navigation (plan ou app)
+ */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppDetail, TreatmentSelection } from '../types'
 
 interface TreatmentModalProps {
+  /** Sélection active (app + traitement) ou null si fermé */
   selection: TreatmentSelection | null
+  /** Callback pour retourner au plan (ferme toutes les modales) */
   onBackToPlan: () => void
+  /** Callback pour retourner à la modale de l'application */
   onBackToApp: (app: AppDetail) => void
 }
 
-// Modale secondaire : détaille les jobs d'un traitement et propose de revenir au plan ou à l'app.
+/**
+ * TreatmentModal - Composant de la modale de traitement
+ * 
+ * @example
+ * ```tsx
+ * <TreatmentModal 
+ *   selection={{ app: appDetails, treatment: selectedTreatment }}
+ *   onBackToPlan={() => setSelectedTreatment(null)}
+ *   onBackToApp={(app) => { setSelectedApp(app); setSelectedTreatment(null) }}
+ * />
+ * ```
+ */
 function TreatmentModal({ selection, onBackToPlan, onBackToApp }: TreatmentModalProps) {
   // Mêmes mécaniques d'animation que PlanModal.
   const [isClosing, setIsClosing] = useState(false)

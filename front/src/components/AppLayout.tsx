@@ -1,3 +1,25 @@
+/**
+ * AppLayout - Layout principal de l'application avec routing
+ * 
+ * Responsabilités :
+ * - Gestion du routing (React Router v6) entre toutes les pages
+ * - Affichage permanent du Hero (bandeau de navigation) et Footer
+ * - Coordination de la modale de recherche avancée
+ * - Distribution des données du plan (planData) aux composants enfants
+ * - Gestion de la sélection depuis la recherche avec navigation automatique
+ * 
+ * Architecture :
+ * - Layout persistant : Hero + Routes + Footer + CookieConsent
+ * - Données centralisées via usePlanData (depuis plan-data.json)
+ * - État local : ouverture modale de recherche + sélection active
+ * - Routes disponibles : /, /plan, /vtom-json, /documentation
+ * 
+ * Flux de recherche :
+ * 1. Utilisateur ouvre la recherche (depuis QuickAccess ou Hero)
+ * 2. Sélectionne une application dans AdvancedSearchModal
+ * 3. Redirection automatique vers /plan avec sélection pré-appliquée
+ * 4. PlanPage reçoit la sélection et ouvre la modale correspondante
+ */
 import { useCallback, useMemo, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import AdvancedSearchModal from './AdvancedSearchModal'
@@ -10,8 +32,15 @@ import Home from './Home'
 import PlanPage from './PlanPage'
 import { usePlanData } from '../hooks/usePlanData'
 
-// Gère la navigation principale, la barre héro, et la recherche avant d'orienter vers les pages.
-// Ce composant coordonne les données statiques et les interactions utilisateur.
+/**
+ * AppLayout - Composant racine de l'application avec routing
+ * 
+ * @example
+ * ```tsx
+ * // Utilisé directement dans App.tsx
+ * <AppLayout />
+ * ```
+ */
 function AppLayout() {
   const { planData, planApplications: precomputedApplications, getAppDetail } = usePlanData()
   const {
