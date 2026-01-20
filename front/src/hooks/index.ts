@@ -17,3 +17,7 @@ export { useVtomEnvironments } from './useVtomEnvironments'
 
 // Hook pour récupérer les applications d'un environnement VTOM spécifique
 export { useVtomApplications } from './useVtomApplications'
+
+// Hook pour récupérer la liste des utilisateurs VTOM
+export { useVtomUsers } from './useVtomUsers'
+

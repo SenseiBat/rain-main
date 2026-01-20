@@ -27,9 +27,9 @@ export default defineConfig({
   server: {
     /**
      * host: '0.0.0.0' permet d'accéder au serveur de dev depuis :
-     * - localhost (machine locale)
-     * - L'adresse IP de la machine (depuis d'autres appareils du réseau)
-     * Utile pour tester sur mobile ou depuis un autre ordinateur
+     * - L'adresse IP de la machine (10.37.44.204:5179 recommandé)
+     * - localhost (machine locale uniquement)
+     * Utile pour tester sur mobile ou depuis un autre ordinateur du réseau
      */
     host: '0.0.0.0',
     

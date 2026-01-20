@@ -17,7 +17,7 @@
  * - Layout responsive (grille qui s'adapte aux écrans)
  * 
  * Contenu piloté par JSON (plan-data.json > quickAccess)
- */
+ */ 
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CSSVarProperties, QuickAccessContent, QuickLink } from '../types'

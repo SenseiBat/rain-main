@@ -291,9 +291,9 @@ docker exec -it back_vitrine php artisan migrate
 ```
 
 5. **Accéder à l'application**
-- Frontend : http://localhost:5179
-- Backend API : http://localhost:8009
-- PostgreSQL : localhost:5439
+- Frontend : http://10.37.44.204:5179 (ou http://localhost:5179)
+- Backend API : http://10.37.44.204:8009 (ou http://localhost:8009)
+- PostgreSQL : 10.37.44.204:5439 (ou localhost:5439)
 
 ### Installation locale (sans Docker)
 
@@ -328,7 +328,7 @@ npm install
 npm run dev
 ```
 
-L'application sera accessible sur http://localhost:5173
+L'application sera accessible sur http://10.37.44.204:5173 (ou http://localhost:5173)
 
 ### Arrêt de l'application
 
@@ -1271,7 +1271,7 @@ curl http://localhost:8009/api/health
 
 **Frontend :**
 ```bash
-curl http://localhost:5179
+curl http://10.37.44.204:5179
 ```
 
 **Base de données :**
