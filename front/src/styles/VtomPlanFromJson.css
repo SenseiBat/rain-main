@@ -1,0 +1,584 @@
+/**
+ * Styles pour VtomPlanFromJson - Plan VTOM généré depuis tours.json
+ */
+
+/* Animation d'arrivée */
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vtom-plan-wrapper {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 0 2rem 2rem 2rem;
+}
+
+.vtom-plan-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 4px 6px rgba(0, 0, 0, 0.05),
+              0 10px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  animation: fadeSlideIn 0.6s ease both;
+}
+
+/* Header */
+.vtom-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.vtom-plan__eyebrow {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.vtom-plan-header h2 {
+  font-size: 2.5rem;
+  color: #1a1a2e;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.vtom-plan-header p {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Contrôles */
+.vtom-plan-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+  min-width: 300px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.zoom-level {
+  color: #667eea;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Canvas */
+.vtom-plan-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.vtom-plan-canvas {
+  position: relative;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 4px 6px rgba(0, 0, 0, 0.05),
+              0 10px 20px rgba(0, 0, 0, 0.05);
+  height: 600px;
+  min-height: 500px;
+}
+
+.vtom-plan-svg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.vtom-plan-svg.panning {
+  cursor: grabbing;
+}
+
+/* Nodes d'application */
+.column-group {
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.column-group rect {
+  transition: fill-opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+  stroke-width: 2;
+  stroke-opacity: 0.3;
+}
+
+.column-group text {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Séparateurs de phases - lignes verticales */
+.phase-separator {
+  pointer-events: none;
+}
+
+.phase-separator line {
+  filter: drop-shadow(0 1px 4px rgba(102, 126, 234, 0.4));
+  stroke-linecap: round;
+}
+
+.phase-separator rect {
+  transition: fill-opacity 0.3s ease;
+}
+
+.phase-separator text {
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.app-link {
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-link line {
+  transition: stroke-opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), stroke-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  stroke-linecap: round;
+}
+
+.app-node {
+  transition: transform 0.2s ease, filter 0.2s ease;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+}
+
+.app-node rect {
+  rx: 8;
+  ry: 8;
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+.app-node:hover {
+  transform: scale(1.01);
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.15));
+  z-index: 100;
+}
+
+.app-node:active {
+  transform: scale(1.005);
+}
+
+.app-node:hover rect {
+  stroke-width: 2.2;
+  stroke-opacity: 0.7;
+}
+
+.app-name {
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.traffic-light {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.traffic-light rect {
+  rx: 12;
+  ry: 12;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1.5;
+}
+
+.traffic-light:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 10px rgba(255, 87, 34, 0.3));
+}
+
+.traffic-light:hover rect {
+  stroke: rgba(255, 87, 34, 0.2);
+  stroke-width: 1.5;
+}
+
+.plan-comment {
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.08));
+}
+
+.plan-comment rect {
+  rx: 8;
+  ry: 8;
+  stroke-width: 1;
+  stroke-opacity: 0.2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.plan-comment:hover {
+  opacity: 1 !important;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+.plan-comment text {
+  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.08));
+}
+
+/* Légende (ancienne version dans le canvas - maintenant cachée) */
+.vtom-plan-legend {
+  display: none;
+}
+
+.legend-section {
+  margin-bottom: 1rem;
+}
+
+.legend-section:last-child {
+  margin-bottom: 0;
+}
+
+.legend-section-title {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-item span {
+  font-size: 1.2rem;
+}
+
+/* Légende externe */
+.vtom-plan-legend-external {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 4px 6px rgba(0, 0, 0, 0.05),
+              0 10px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.vtom-plan-legend-external h4 {
+  margin: 0 0 1.25rem 0;
+  color: #1a1a2e;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+}
+
+.legend-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .legend-sections-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Minimap */
+.vtom-plan-minimap {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 200px;
+  height: 280px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 4px 6px rgba(0, 0, 0, 0.05),
+              0 10px 20px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+.minimap-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Modale */
+.vtom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vtom-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1),
+              0 10px 25px rgba(0, 0, 0, 0.1),
+              0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.vtom-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #f3f4f6;
+  border: none;
+  color: #374151;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.vtom-modal__close:hover {
+  background: #e5e7eb;
+  transform: scale(1.1);
+}
+
+.vtom-modal__header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vtom-modal__header h3 {
+  margin: 0;
+  color: #1a1a2e;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.status-badge {
+  background: rgba(55, 181, 122, 0.15);
+  color: #2d7a4f;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(55, 181, 122, 0.3);
+  white-space: nowrap;
+}
+
+.vtom-modal__body {
+  padding: 2rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 1rem;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 120px;
+}
+
+.detail-row .value {
+  color: #1a1a2e;
+  font-size: 1rem;
+  flex: 1;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vtom-plan-wrapper {
+    padding: 1rem;
+  }
+
+  .vtom-plan-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vtom-plan-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .vtom-plan-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    min-width: 100%;
+  }
+
+  .vtom-plan-canvas {
+    height: calc(100vh - 350px);
+  }
+
+  .vtom-plan-legend {
+    top: auto;
+    bottom: 300px;
+    right: 0.5rem;
+    left: 0.5rem;
+    min-width: auto;
+  }
+
+  .vtom-plan-minimap {
+    width: 120px;
+    height: 168px;
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .vtom-modal {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .vtom-modal__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-row .value {
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .app-node,
+  .vtom-modal,
+  .vtom-modal-overlay {
+    animation: none;
+    transition: none;
+  }
+}

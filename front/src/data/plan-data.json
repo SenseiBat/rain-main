@@ -30,6 +30,13 @@
         "path": "/plan"
       },
       {
+        "label": "Plan VTom XML",
+        "icon": "🗺️",
+        "ariaLabel": "plan vtom xml",
+        "variant": "outline",
+        "path": "/vtom-plan"
+      },
+      {
         "label": "Vtom JSON",
         "icon": "🌐",
         "ariaLabel": "vtom json",

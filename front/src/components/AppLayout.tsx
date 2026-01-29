@@ -26,6 +26,7 @@ import AdvancedSearchModal from './AdvancedSearchModal'
 import CookieConsent from './CookieConsent'
 import Documentation from './Documentation'
 import VtomJson from './VtomJson'
+import VtomPlanFromJson from './VtomPlanFromJson'
 import Footer from './Footer'
 import Hero from './Hero'
 import Home from './Home'
@@ -111,6 +112,7 @@ function AppLayout() {
         />
         <Route path="/documentation" element={<Documentation />} />
         <Route path="/vtom-json" element={<VtomJson />} />
+        <Route path="/vtom-plan" element={<VtomPlanFromJson />} />
         <Route
           path="/plan"
           element={

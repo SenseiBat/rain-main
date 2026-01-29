@@ -376,6 +376,7 @@ rain-main/
     │   │   ├── Home.tsx            # Page d'accueil
     │   │   ├── Documentation.tsx   # Page documentation
     │   │   ├── VtomJson.tsx        # Page VTOM JSON
+    │   │   ├── VtomPlanFromJson.tsx # Plan cartographique depuis tours.json
     │   │   ├── PlanPage.tsx        # Page du plan VTOM
     │   │   ├── PlanBoard.tsx       # Tableau du plan
     │   │   ├── PlanModal.tsx       # Modale application
@@ -625,6 +626,15 @@ En arrivant sur la page d'accueil :
 - Page VTOM JSON
 - Liste des environnements
 - Accordion des applications PAY_TOURS
+
+**VtomPlanFromJson.tsx**
+- Plan cartographique généré depuis tours.json
+- Affichage des applications selon coordonnées réelles (x, y)
+- Interactions : zoom, pan, sélection
+- Modale de détails avec informations complètes
+- Minimap pour navigation globale
+- Légende des statuts (✅ Terminé, ⏳ Attente, ▶️ En cours)
+- Recherche et filtrage d'applications
 
 #### Composants de plan
 

@@ -56,6 +56,7 @@ function Footer(): React.JSX.Element {
               <ul className="app-footer__links">
                 <li><a href="/">Accueil</a></li>
                 <li><a href="/plan">Plan complet</a></li>
+                <li><a href="/vtom-plan">Plan Cartographique</a></li>
                 <li><a href="/vtom-json">Vtom JSON</a></li>
                 <li><a href="/documentation">Documentation</a></li>
               </ul>
