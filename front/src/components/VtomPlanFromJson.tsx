@@ -563,6 +563,101 @@ function VtomPlanFromJson() {
     }
   }
 
+  // Adoucir les couleurs trop vives
+  const softenColor = (hexColor: string): string => {
+    // Palette de remplacement pour les couleurs vives
+    const colorMap: { [key: string]: string } = {
+      // Bleus vifs → bleus doux
+      '#0000FF': '#6366F1',
+      '#0000CD': '#818CF8',
+      '#00008B': '#4F46E5',
+      '#000080': '#4338CA',
+      '#0000AA': '#5B21B6',
+      
+      // Violets/Magentas vifs → violets doux
+      '#FF00FF': '#A855F7',
+      '#8B008B': '#9333EA',
+      '#800080': '#7C3AED',
+      '#9400D3': '#8B5CF6',
+      '#FF00AA': '#C084FC',
+      
+      // Rouges vifs → rouges doux
+      '#FF0000': '#EF4444',
+      '#DC143C': '#F87171',
+      '#8B0000': '#DC2626',
+      '#CD5C5C': '#FCA5A5',
+      
+      // Verts vifs → verts doux
+      '#00FF00': '#10B981',
+      '#00AA00': '#059669',
+      '#008000': '#047857',
+      '#32CD32': '#34D399',
+      '#00FF7F': '#6EE7B7',
+      
+      // Jaunes/Oranges vifs → jaunes/oranges doux
+      '#FFFF00': '#FCD34D',
+      '#FFD700': '#FBBF24',
+      '#FFA500': '#F59E0B',
+      '#FF8C00': '#F97316',
+      
+      // Cyans vifs → cyans doux
+      '#00FFFF': '#22D3EE',
+      '#00CED1': '#06B6D4',
+      '#00AAAA': '#0891B2',
+      
+      // Roses vifs → roses doux
+      '#FF1493': '#F472B6',
+      '#FF69B4': '#F9A8D4',
+      '#FFB6C1': '#FBCFE8',
+    }
+    
+    // Normaliser le format hex
+    const normalizedColor = hexColor.toUpperCase()
+    
+    // Si la couleur est dans la map, la remplacer
+    if (colorMap[normalizedColor]) {
+      return colorMap[normalizedColor]
+    }
+    
+    // Sinon, adoucir algorithmiquement
+    try {
+      // Extraire RGB
+      const hex = normalizedColor.replace('#', '')
+      if (hex.length !== 6) return hexColor
+      
+      let r = parseInt(hex.substr(0, 2), 16)
+      let g = parseInt(hex.substr(2, 2), 16)
+      let b = parseInt(hex.substr(4, 2), 16)
+      
+      // Calculer la luminosité
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000
+      
+      // Si la couleur est trop saturée (composante à 255 et autres basses)
+      const maxComponent = Math.max(r, g, b)
+      const minComponent = Math.min(r, g, b)
+      const saturation = maxComponent === 0 ? 0 : (maxComponent - minComponent) / maxComponent
+      
+      if (saturation > 0.7 || brightness < 100) {
+        // Réduire la saturation en mélangeant avec du gris
+        const gray = brightness
+        r = Math.round(r * 0.7 + gray * 0.3)
+        g = Math.round(g * 0.7 + gray * 0.3)
+        b = Math.round(b * 0.7 + gray * 0.3)
+        
+        // Augmenter légèrement la luminosité si trop sombre
+        if (brightness < 80) {
+          r = Math.min(255, r + 30)
+          g = Math.min(255, g + 30)
+          b = Math.min(255, b + 30)
+        }
+      }
+      
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+    } catch {
+      return hexColor
+    }
+  }
+
   return (
     <div className="vtom-plan-wrapper">
       <div className="vtom-plan-container">
@@ -744,7 +839,7 @@ function VtomPlanFromJson() {
                 y={app.y}
                 width={app.width}
                 height={80}
-                fill={app.background}
+                fill={softenColor(app.background)}
                 stroke="rgba(255,255,255,0.3)"
                 strokeWidth="2"
                 rx="8"
@@ -890,7 +985,7 @@ function VtomPlanFromJson() {
                 y={app.y}
                 width={app.width}
                 height={80}
-                fill={app.background}
+                fill={softenColor(app.background)}
                 opacity="0.8"
               />
             ))}
