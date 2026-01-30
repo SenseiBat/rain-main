@@ -18,6 +18,24 @@ import GhostButton from './GhostButton'
 import toursData from '../data/tours.json'
 import '../styles/VtomPlanFromJson.css'
 
+interface Job {
+  name: string
+  status?: string
+  script?: string
+  parameters?: string[]
+  frequency?: string
+  mode?: string
+  minStart?: string
+  maxStart?: string
+  retcode?: string
+  background?: string
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  parentApp?: string
+}
+
 interface ApplicationNode {
   name: string
   x: number
@@ -30,9 +48,16 @@ interface ApplicationNode {
   cycleEnabled?: string
   cycle?: string
   jobsCount?: number
+  jobs?: Job[]
 }
 
 interface ApplicationLink {
+  from: string
+  to: string
+  type: string
+}
+
+interface JobLink {
   from: string
   to: string
   type: string
@@ -69,16 +94,23 @@ interface SelectedApp {
   mouseY: number
 }
 
+interface SelectedJob {
+  job: Job
+  appName: string
+}
+
 /**
  * VtomPlanFromJson - Composant principal du plan depuis JSON
  */
 function VtomPlanFromJson() {
   const [applications, setApplications] = useState<ApplicationNode[]>([])
   const [links, setLinks] = useState<ApplicationLink[]>([])
+  const [allJobs, setAllJobs] = useState<Job[]>([])
   const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([])
   const [comments, setComments] = useState<Comment[]>([])
   const [columns, setColumns] = useState<Column[]>([])
   const [selectedApp, setSelectedApp] = useState<SelectedApp | null>(null)
+  const [selectedJob, setSelectedJob] = useState<SelectedJob | null>(null)
   // Vue initiale optimisée pour afficher les trois colonnes principales
   const [viewBox, setViewBox] = useState({ x: 0, y: 50, width: 3000, height: 1000 })
   const [scale, setScale] = useState(1)
@@ -156,10 +188,50 @@ function VtomPlanFromJson() {
                 }
               }
 
-              // Comptage des jobs
+              // Comptage et extraction des jobs
               let jobsCount = 0
+              const jobs: Job[] = []
+              
               if (app.Jobs?.Job) {
-                jobsCount = Array.isArray(app.Jobs.Job) ? app.Jobs.Job.length : 1
+                const jobsData = Array.isArray(app.Jobs.Job) ? app.Jobs.Job : [app.Jobs.Job]
+                jobsCount = jobsData.length
+                
+                jobsData.forEach((job: any) => {
+                  // Extraction de la couleur du job
+                  let jobBackground = '#9932cc' // Couleur par défaut
+                  const jobProperties = job?.Node?.Properties?.Property
+                  
+                  if (Array.isArray(jobProperties)) {
+                    jobProperties.forEach((prop: any) => {
+                      if (prop['@key'] === 'background') {
+                        jobBackground = prop['@value']
+                      }
+                    })
+                  } else if (jobProperties && jobProperties['@key'] === 'background') {
+                    jobBackground = jobProperties['@value']
+                  }
+                  
+                  // Extraction des paramètres
+                  let parameters: string[] = []
+                  if (job.Parameters?.Parameter) {
+                    parameters = Array.isArray(job.Parameters.Parameter) 
+                      ? job.Parameters.Parameter 
+                      : [job.Parameters.Parameter]
+                  }
+                  
+                  jobs.push({
+                    name: job['@name'] || 'Sans nom',
+                    status: job['@status'],
+                    script: job.Script,
+                    parameters: parameters,
+                    frequency: job['@frequency'],
+                    mode: job['@mode'],
+                    minStart: job['@minStart'],
+                    maxStart: job['@maxStart'],
+                    retcode: job['@retcode'],
+                    background: jobBackground
+                  })
+                })
               }
 
               apps.push({
@@ -173,7 +245,8 @@ function VtomPlanFromJson() {
                 comment: app['@comment'],
                 cycleEnabled: app['@cycleEnabled'],
                 cycle: app['@cycle'],
-                jobsCount: jobsCount
+                jobsCount: jobsCount,
+                jobs: jobs
               })
             }
           })
@@ -218,6 +291,36 @@ function VtomPlanFromJson() {
       }
 
       return extractedLinks
+    }
+
+    const extractAllJobs = (apps: ApplicationNode[]) => {
+      const jobsList: Job[] = []
+      const jobWidth = 180
+      const jobHeight = 60
+      const jobSpacing = 10
+      
+      apps.forEach(app => {
+        if (app.jobs && app.jobs.length > 0) {
+          // Calculer la position de départ des jobs sous l'application
+          const startY = app.y + 100 // 20px sous l'application (hauteur app = 80px)
+          
+          app.jobs.forEach((job, index) => {
+            // Positionner les jobs en colonne sous leur application
+            const jobY = startY + (index * (jobHeight + jobSpacing))
+            
+            jobsList.push({
+              ...job,
+              x: app.x + (app.width - jobWidth) / 2, // Centrer sous l'application
+              y: jobY,
+              width: jobWidth,
+              height: jobHeight,
+              parentApp: app.name
+            })
+          })
+        }
+      })
+      
+      return jobsList
     }
 
     const extractTrafficLights = () => {
@@ -367,6 +470,7 @@ function VtomPlanFromJson() {
     const extractedApps = extractApplications()
     setApplications(extractedApps)
     setLinks(extractLinks())
+    setAllJobs(extractAllJobs(extractedApps))
     setTrafficLights(extractTrafficLights())
     setComments(extractComments())
     setColumns(extractColumns(extractedApps))
@@ -422,6 +526,68 @@ function VtomPlanFromJson() {
 
   const closeModal = () => {
     setSelectedApp(null)
+  }
+
+  // Gestion de la sélection d'un job
+  const handleJobClick = (job: Job, appName: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedJob({
+      job,
+      appName
+    })
+  }
+
+  const closeJobModal = () => {
+    setSelectedJob(null)
+  }
+
+  // Fonction pour extraire les liens entre jobs d'une application
+  const getJobLinksForApp = (appName: string, jobs: Job[]): JobLink[] => {
+    const jobLinks: JobLink[] = []
+    
+    try {
+      const domain = toursData?.Domain
+      const linksData = domain?.Links?.Link
+
+      if (Array.isArray(linksData)) {
+        linksData.forEach((link: any) => {
+          const parent = link['@parent']
+          const child = link['@child']
+          
+          if (parent && child) {
+            // Format: PAY_TOURS/APPLICATION/JOB
+            const parentParts = parent.split('/')
+            const childParts = child.split('/')
+            
+            if (parentParts.length === 3 && childParts.length === 3) {
+              const parentApp = parentParts[1]
+              const parentJob = parentParts[2]
+              const childApp = childParts[1]
+              const childJob = childParts[2]
+              
+              // Seulement les liens au sein de la même application
+              if (parentApp === appName && childApp === appName) {
+                // Vérifier que les deux jobs existent dans la liste
+                const fromJobExists = jobs.some(j => j.name === parentJob)
+                const toJobExists = jobs.some(j => j.name === childJob)
+                
+                if (fromJobExists && toJobExists) {
+                  jobLinks.push({
+                    from: parentJob,
+                    to: childJob,
+                    type: link['@type'] || 'M'
+                  })
+                }
+              }
+            }
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'extraction des liens entre jobs:', error)
+    }
+
+    return jobLinks
   }
 
   // Gestion du drag du viewport dans la minimap
@@ -678,9 +844,9 @@ function VtomPlanFromJson() {
           <p className="vtom-plan__eyebrow">Plan cartographique</p>
           <h2>Plan vTom XML</h2>
           <p>
-            {applications.length} applications • {links.length} liens • {trafficLights.length} feux rouges • {comments.length} commentaires • {columns.length} colonnes
+            {applications.length} applications • {allJobs.length} traitements • {links.length} liens entre applications • {trafficLights.length} feux rouges • {comments.length} commentaires • {columns.length} colonnes
             {columns.length > 0 && ` (${columns.map(c => c.name).join(', ')})`} • 
-            Utilisez le zoom et le déplacement pour naviguer.
+            Cliquez sur une application pour voir ses traitements.
           </p>
         </div>
         
@@ -1158,7 +1324,11 @@ function VtomPlanFromJson() {
         <h4>Légende</h4>
         <div className="legend-sections-grid">
           <div className="legend-section">
-            <p className="legend-section-title">Annotations</p>
+            <p className="legend-section-title">Éléments</p>
+            <div className="legend-item">
+              <span style={{ fontSize: '20px', marginRight: '8px' }}>📦</span>
+              Applications
+            </div>
             <div className="legend-item">
               <span style={{ fontSize: '24px', marginRight: '8px' }}>🚦</span>
               Points de contrôle
@@ -1184,7 +1354,7 @@ function VtomPlanFromJson() {
             </div>
           </div>
           <div className="legend-section">
-            <p className="legend-section-title">Liens</p>
+            <p className="legend-section-title">Liens entre applications</p>
             <div className="legend-item">
               <svg width="30" height="2" style={{ marginRight: '8px' }}>
                 <line x1="0" y1="1" x2="30" y2="1" stroke="#2d7a4f" strokeWidth="2" strokeOpacity="0.7" />
@@ -1263,6 +1433,438 @@ function VtomPlanFromJson() {
                 <div className="detail-row">
                   <span className="label">Commentaire:</span>
                   <span className="value">{selectedApp.app.comment}</span>
+                </div>
+              )}
+
+              {/* Section des traitements */}
+              {selectedApp.app.jobs && selectedApp.app.jobs.length > 0 && (() => {
+                const jobLinks = getJobLinksForApp(selectedApp.app.name, selectedApp.app.jobs)
+                const jobWidth = 250
+                const jobHeight = 120
+                const jobSpacing = 40
+                const canvasWidth = 800
+                const canvasHeight = Math.max(400, selectedApp.app.jobs.length * (jobHeight + jobSpacing))
+                
+                // Positionner les jobs en colonne
+                const jobsWithPositions = selectedApp.app.jobs.map((job, index) => ({
+                  ...job,
+                  x: (canvasWidth - jobWidth) / 2,
+                  y: 20 + index * (jobHeight + jobSpacing)
+                }))
+                
+                return (
+                  <div className="jobs-section">
+                    <h4 style={{ marginTop: '24px', marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}>
+                      Traitements ({selectedApp.app.jobs.length})
+                      {jobLinks.length > 0 && ` • ${jobLinks.length} lien(s)`}
+                    </h4>
+                    
+                    {/* Canvas SVG avec les jobs et leurs liens */}
+                    <div style={{ 
+                      width: '100%', 
+                      maxHeight: '600px', 
+                      overflowY: 'auto', 
+                      border: '1px solid #e5e7eb', 
+                      borderRadius: '8px',
+                      backgroundColor: '#fafbfc'
+                    }}>
+                      <svg 
+                        width={canvasWidth} 
+                        height={canvasHeight}
+                        style={{ display: 'block' }}
+                      >
+                        {/* Grille de fond légère */}
+                        <defs>
+                          <pattern id="job-grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1"/>
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#job-grid)" />
+                        
+                        {/* Liens entre jobs */}
+                        {jobLinks.map((link, linkIndex) => {
+                          const fromJob = jobsWithPositions.find(j => j.name === link.from)
+                          const toJob = jobsWithPositions.find(j => j.name === link.to)
+                          
+                          if (fromJob && toJob) {
+                            const fromX = fromJob.x + jobWidth / 2
+                            const fromY = fromJob.y + jobHeight
+                            const toX = toJob.x + jobWidth / 2
+                            const toY = toJob.y
+                            
+                            return (
+                              <g key={`job-link-${linkIndex}`}>
+                                <defs>
+                                  <marker
+                                    id={`job-arrow-modal-${linkIndex}`}
+                                    markerWidth="10"
+                                    markerHeight="10"
+                                    refX="9"
+                                    refY="5"
+                                    orient="auto"
+                                  >
+                                    <path
+                                      d="M0,0 L0,10 L10,5 z"
+                                      fill={link.type === 'E' ? '#10b981' : '#8b5cf6'}
+                                    />
+                                  </marker>
+                                </defs>
+                                <line
+                                  x1={fromX}
+                                  y1={fromY}
+                                  x2={toX}
+                                  y2={toY}
+                                  stroke={link.type === 'E' ? '#10b981' : '#8b5cf6'}
+                                  strokeWidth="3"
+                                  strokeOpacity="0.7"
+                                  strokeDasharray={link.type === 'M' ? '8,4' : '0'}
+                                  markerEnd={`url(#job-arrow-modal-${linkIndex})`}
+                                />
+                              </g>
+                            )
+                          }
+                          return null
+                        })}
+                        
+                        {/* Jobs */}
+                        {jobsWithPositions.map((job, index) => (
+                          <g 
+                            key={`job-${index}`}
+                            onClick={(e) => handleJobClick(job, selectedApp.app.name, e)}
+                            style={{ cursor: 'pointer' }}
+                            className="job-node"
+                          >
+                            {/* Rectangle du job */}
+                            <rect
+                              x={job.x}
+                              y={job.y}
+                              width={jobWidth}
+                              height={jobHeight}
+                              fill={softenColor(job.background || '#9932cc')}
+                              stroke="rgba(255,255,255,0.5)"
+                              strokeWidth="2"
+                              rx="8"
+                              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                            />
+                            
+                            {/* Nom du job */}
+                            <text
+                              x={job.x + jobWidth / 2}
+                              y={job.y + 25}
+                              textAnchor="middle"
+                              fill="white"
+                              fontSize="14"
+                              fontWeight="600"
+                            >
+                              {job.name.length > 25 ? job.name.substring(0, 23) + '...' : job.name}
+                            </text>
+                            
+                            {/* Statut */}
+                            {job.status && (
+                              <text
+                                x={job.x + jobWidth / 2}
+                                y={job.y + 48}
+                                textAnchor="middle"
+                                fill="rgba(255,255,255,0.85)"
+                                fontSize="12"
+                              >
+                                {getStatusIcon(job.status)} {job.status}
+                              </text>
+                            )}
+                            
+                            {/* Script */}
+                            {job.script && (
+                              <text
+                                x={job.x + jobWidth / 2}
+                                y={job.y + 70}
+                                textAnchor="middle"
+                                fill="rgba(255,255,255,0.75)"
+                                fontSize="10"
+                                fontFamily="monospace"
+                              >
+                                {job.script.length > 35 ? job.script.substring(0, 33) + '...' : job.script}
+                              </text>
+                            )}
+                            
+                            {/* Fréquence et mode */}
+                            <text
+                              x={job.x + jobWidth / 2}
+                              y={job.y + 90}
+                              textAnchor="middle"
+                              fill="rgba(255,255,255,0.7)"
+                              fontSize="10"
+                            >
+                              {job.frequency && `Freq: ${job.frequency}`}
+                              {job.frequency && job.mode && ' • '}
+                              {job.mode && `Mode: ${job.mode}`}
+                            </text>
+                            
+                            {/* Horaires */}
+                            {(job.minStart || job.maxStart) && (
+                              <text
+                                x={job.x + jobWidth / 2}
+                                y={job.y + 108}
+                                textAnchor="middle"
+                                fill="rgba(255,255,255,0.7)"
+                                fontSize="9"
+                              >
+                                {job.minStart && `${job.minStart}`}
+                                {job.minStart && job.maxStart && ' → '}
+                                {job.maxStart && `${job.maxStart}`}
+                              </text>
+                            )}
+                          </g>
+                        ))}
+                      </svg>
+                    </div>
+                    
+                    {/* Liste détaillée des jobs (optionnelle) */}
+                    <details style={{ marginTop: '16px' }}>
+                      <summary style={{ cursor: 'pointer', fontWeight: '600', color: '#374151', padding: '8px 0' }}>
+                        📋 Voir les détails complets
+                      </summary>
+                      <div className="jobs-list" style={{ marginTop: '12px' }}>
+                        {selectedApp.app.jobs.map((job, index) => (
+                      <div 
+                        key={index} 
+                        className="job-card"
+                        style={{
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          padding: '16px',
+                          marginBottom: '12px',
+                          backgroundColor: '#f9fafb',
+                          borderLeft: `4px solid ${softenColor(job.background || '#9932cc')}`
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                          <h5 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#111827' }}>
+                            {job.name}
+                          </h5>
+                          {job.status && (
+                            <span style={{
+                              padding: '4px 12px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              backgroundColor: '#e0e7ff',
+                              color: '#3730a3'
+                            }}>
+                              {getStatusIcon(job.status)} {job.status}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div style={{ display: 'grid', gap: '8px', fontSize: '14px' }}>
+                          {job.script && (
+                            <div style={{ display: 'flex' }}>
+                              <span style={{ fontWeight: '500', color: '#6b7280', minWidth: '120px' }}>Script:</span>
+                              <span style={{ color: '#374151', fontFamily: 'monospace', fontSize: '13px' }}>{job.script}</span>
+                            </div>
+                          )}
+                          
+                          {job.parameters && job.parameters.length > 0 && (
+                            <div style={{ display: 'flex' }}>
+                              <span style={{ fontWeight: '500', color: '#6b7280', minWidth: '120px' }}>Paramètres:</span>
+                              <div style={{ flex: 1 }}>
+                                {job.parameters.map((param, idx) => (
+                                  <div 
+                                    key={idx} 
+                                    style={{ 
+                                      color: '#374151', 
+                                      fontFamily: 'monospace', 
+                                      fontSize: '13px',
+                                      backgroundColor: '#fff',
+                                      padding: '4px 8px',
+                                      borderRadius: '4px',
+                                      marginBottom: '4px',
+                                      border: '1px solid #e5e7eb'
+                                    }}
+                                  >
+                                    {param}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                            {job.frequency && (
+                              <div style={{ display: 'flex' }}>
+                                <span style={{ fontWeight: '500', color: '#6b7280' }}>Fréquence:</span>
+                                <span style={{ color: '#374151', marginLeft: '8px' }}>{job.frequency}</span>
+                              </div>
+                            )}
+                            
+                            {job.mode && (
+                              <div style={{ display: 'flex' }}>
+                                <span style={{ fontWeight: '500', color: '#6b7280' }}>Mode:</span>
+                                <span style={{ color: '#374151', marginLeft: '8px' }}>{job.mode}</span>
+                              </div>
+                            )}
+                            
+                            {job.minStart && (
+                              <div style={{ display: 'flex' }}>
+                                <span style={{ fontWeight: '500', color: '#6b7280' }}>Début min:</span>
+                                <span style={{ color: '#374151', marginLeft: '8px' }}>{job.minStart}</span>
+                              </div>
+                            )}
+                            
+                            {job.maxStart && (
+                              <div style={{ display: 'flex' }}>
+                                <span style={{ fontWeight: '500', color: '#6b7280' }}>Début max:</span>
+                                <span style={{ color: '#374151', marginLeft: '8px' }}>{job.maxStart}</span>
+                              </div>
+                            )}
+                            
+                            {job.retcode && (
+                              <div style={{ display: 'flex' }}>
+                                <span style={{ fontWeight: '500', color: '#6b7280' }}>Code retour:</span>
+                                <span style={{ color: '#374151', marginLeft: '8px' }}>{job.retcode}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                      </div>
+                    </details>
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale de détails d'un job */}
+      {selectedJob && (
+        <div className="vtom-modal-overlay" onClick={closeJobModal} style={{ zIndex: 1001 }}>
+          <div className="vtom-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <button className="vtom-modal__close" onClick={closeJobModal}>
+              ✕
+            </button>
+            
+            <div className="vtom-modal__header">
+              <h3>{selectedJob.job.name}</h3>
+              <span className="status-badge">
+                {getStatusIcon(selectedJob.job.status)} {selectedJob.job.status || 'N/A'}
+              </span>
+            </div>
+            
+            <div className="vtom-modal__body">
+              <div className="detail-row">
+                <span className="label">Application:</span>
+                <span className="value">{selectedJob.appName}</span>
+              </div>
+              
+              {selectedJob.job.script && (
+                <div className="detail-row" style={{ alignItems: 'flex-start' }}>
+                  <span className="label">Chemin du script:</span>
+                  <span 
+                    className="value" 
+                    style={{ 
+                      fontFamily: 'monospace', 
+                      fontSize: '13px',
+                      backgroundColor: '#f3f4f6',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      wordBreak: 'break-all',
+                      flex: 1
+                    }}
+                  >
+                    {selectedJob.job.script}
+                  </span>
+                </div>
+              )}
+              
+              {selectedJob.job.parameters && selectedJob.job.parameters.length > 0 && (
+                <div className="detail-row" style={{ alignItems: 'flex-start' }}>
+                  <span className="label">Paramètres:</span>
+                  <div style={{ flex: 1 }}>
+                    {selectedJob.job.parameters.map((param, idx) => (
+                      <div 
+                        key={idx} 
+                        style={{ 
+                          fontFamily: 'monospace', 
+                          fontSize: '13px',
+                          backgroundColor: '#f3f4f6',
+                          padding: '6px 10px',
+                          borderRadius: '4px',
+                          marginBottom: '6px',
+                          wordBreak: 'break-all'
+                        }}
+                      >
+                        {param}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '16px', 
+                marginTop: '16px',
+                padding: '16px',
+                backgroundColor: '#f9fafb',
+                borderRadius: '8px'
+              }}>
+                {selectedJob.job.frequency && (
+                  <div className="detail-row">
+                    <span className="label">Fréquence:</span>
+                    <span className="value">{selectedJob.job.frequency}</span>
+                  </div>
+                )}
+                
+                {selectedJob.job.mode && (
+                  <div className="detail-row">
+                    <span className="label">Mode:</span>
+                    <span className="value">{selectedJob.job.mode}</span>
+                  </div>
+                )}
+                
+                {selectedJob.job.minStart && (
+                  <div className="detail-row">
+                    <span className="label">Heure min:</span>
+                    <span className="value">{selectedJob.job.minStart}</span>
+                  </div>
+                )}
+                
+                {selectedJob.job.maxStart && (
+                  <div className="detail-row">
+                    <span className="label">Heure max:</span>
+                    <span className="value">{selectedJob.job.maxStart}</span>
+                  </div>
+                )}
+                
+                {selectedJob.job.retcode && (
+                  <div className="detail-row">
+                    <span className="label">Code retour:</span>
+                    <span className="value">{selectedJob.job.retcode}</span>
+                  </div>
+                )}
+              </div>
+              
+              {selectedJob.job.background && (
+                <div className="detail-row" style={{ marginTop: '16px' }}>
+                  <span className="label">Couleur:</span>
+                  <span className="value">
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: selectedJob.job.background,
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        verticalAlign: 'middle',
+                        marginRight: '8px'
+                      }}
+                    />
+                    {selectedJob.job.background}
+                  </span>
                 </div>
               )}
             </div>
