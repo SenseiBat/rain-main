@@ -567,48 +567,49 @@ function VtomPlanFromJson() {
   const softenColor = (hexColor: string): string => {
     // Palette de remplacement pour les couleurs vives
     const colorMap: { [key: string]: string } = {
-      // Bleus vifs → bleus doux
-      '#0000FF': '#6366F1',
-      '#0000CD': '#818CF8',
-      '#00008B': '#4F46E5',
-      '#000080': '#4338CA',
-      '#0000AA': '#5B21B6',
+      // Bleus vifs → bleus doux pastel
+      '#0000FF': '#7C9FFF',
+      '#0000CD': '#93ADFF',
+      '#00008B': '#6B8FEE',
+      '#000080': '#5B7FDD',
+      '#0000AA': '#7A8FEE',
+      '#4B68FF': '#7C9FFF',
       
-      // Violets/Magentas vifs → violets doux
-      '#FF00FF': '#A855F7',
-      '#8B008B': '#9333EA',
-      '#800080': '#7C3AED',
-      '#9400D3': '#8B5CF6',
-      '#FF00AA': '#C084FC',
+      // Violets/Magentas vifs → violets doux pastel
+      '#FF00FF': '#C89FFF',
+      '#8B008B': '#B388EA',
+      '#800080': '#A77FDD',
+      '#9400D3': '#B49FEE',
+      '#FF00AA': '#E098DD',
       
-      // Rouges vifs → rouges doux
-      '#FF0000': '#EF4444',
-      '#DC143C': '#F87171',
-      '#8B0000': '#DC2626',
-      '#CD5C5C': '#FCA5A5',
+      // Rouges vifs → rouges doux corail
+      '#FF0000': '#FF8888',
+      '#DC143C': '#FF9999',
+      '#8B0000': '#DD7777',
+      '#CD5C5C': '#FFAAAA',
       
-      // Verts vifs → verts doux
-      '#00FF00': '#10B981',
-      '#00AA00': '#059669',
-      '#008000': '#047857',
-      '#32CD32': '#34D399',
-      '#00FF7F': '#6EE7B7',
+      // Verts vifs → verts doux menthe
+      '#00FF00': '#88DD99',
+      '#00AA00': '#77CC88',
+      '#008000': '#66BB77',
+      '#32CD32': '#88DD99',
+      '#00FF7F': '#88EEAA',
       
       // Jaunes/Oranges vifs → jaunes/oranges doux
-      '#FFFF00': '#FCD34D',
-      '#FFD700': '#FBBF24',
-      '#FFA500': '#F59E0B',
-      '#FF8C00': '#F97316',
+      '#FFFF00': '#FFEE88',
+      '#FFD700': '#FFDD77',
+      '#FFA500': '#FFBB66',
+      '#FF8C00': '#FFAA55',
       
-      // Cyans vifs → cyans doux
-      '#00FFFF': '#22D3EE',
-      '#00CED1': '#06B6D4',
-      '#00AAAA': '#0891B2',
+      // Cyans vifs → cyans doux aqua
+      '#00FFFF': '#77DDEE',
+      '#00CED1': '#66CCDD',
+      '#00AAAA': '#66BBCC',
       
       // Roses vifs → roses doux
-      '#FF1493': '#F472B6',
-      '#FF69B4': '#F9A8D4',
-      '#FFB6C1': '#FBCFE8',
+      '#FF1493': '#FF88BB',
+      '#FF69B4': '#FFAACC',
+      '#FFB6C1': '#FFCCDD',
     }
     
     // Normaliser le format hex
@@ -619,7 +620,7 @@ function VtomPlanFromJson() {
       return colorMap[normalizedColor]
     }
     
-    // Sinon, adoucir algorithmiquement
+    // Sinon, adoucir algorithmiquement avec une approche plus douce
     try {
       // Extraire RGB
       const hex = normalizedColor.replace('#', '')
@@ -632,23 +633,33 @@ function VtomPlanFromJson() {
       // Calculer la luminosité
       const brightness = (r * 299 + g * 587 + b * 114) / 1000
       
-      // Si la couleur est trop saturée (composante à 255 et autres basses)
+      // Calculer la saturation
       const maxComponent = Math.max(r, g, b)
       const minComponent = Math.min(r, g, b)
       const saturation = maxComponent === 0 ? 0 : (maxComponent - minComponent) / maxComponent
       
-      if (saturation > 0.7 || brightness < 100) {
-        // Réduire la saturation en mélangeant avec du gris
-        const gray = brightness
-        r = Math.round(r * 0.7 + gray * 0.3)
-        g = Math.round(g * 0.7 + gray * 0.3)
-        b = Math.round(b * 0.7 + gray * 0.3)
+      // Appliquer un adoucissement progressif pour toutes les couleurs
+      if (saturation > 0.5 || brightness < 120 || brightness > 200) {
+        // Mélanger avec une teinte pastel basée sur la couleur dominante
+        const midTone = 180 // Point de convergence pour un look pastel
         
-        // Augmenter légèrement la luminosité si trop sombre
-        if (brightness < 80) {
-          r = Math.min(255, r + 30)
-          g = Math.min(255, g + 30)
-          b = Math.min(255, b + 30)
+        // Réduire fortement la saturation pour un effet plus doux
+        r = Math.round(r * 0.5 + midTone * 0.5)
+        g = Math.round(g * 0.5 + midTone * 0.5)
+        b = Math.round(b * 0.5 + midTone * 0.5)
+        
+        // Ajuster la luminosité vers une plage confortable (120-200)
+        const newBrightness = (r * 299 + g * 587 + b * 114) / 1000
+        if (newBrightness < 120) {
+          const boost = 120 - newBrightness
+          r = Math.min(255, r + boost)
+          g = Math.min(255, g + boost)
+          b = Math.min(255, b + boost)
+        } else if (newBrightness > 200) {
+          const reduce = newBrightness - 200
+          r = Math.max(80, r - reduce)
+          g = Math.max(80, g - reduce)
+          b = Math.max(80, b - reduce)
         }
       }
       
